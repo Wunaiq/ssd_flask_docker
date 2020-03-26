@@ -1,1 +1,0 @@
-from SSD_app import app

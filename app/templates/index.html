@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-4">
+        <center>
+        <form id="upload-file" method="post" enctype="multipart/form-data">
+            <label for="imageUpload" class="upload-label">
+               选择图片
+            </label>
+            <input type="file" name="file" id="imageUpload" accept=".png, .jpg, .jpeg">
+        </form>
+        <div class="image-section" style="display:none;">
+            <div class="img-preview">
+                <div id="imagePreview">
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary btn-lg " id="btn-predict">Predict!</button>
+            </div>
+        </div>
+
+        <div class="detection-result" style="display:none;">
+            <div class="result-img">
+                <img id="result-img" src="" alt="detection-result-img" width="256px" height="256px"/>
+            </div>
+            
+        </div>
+
+        <div class="loader" style="display:none;"></div>
+
+        <h3 id="result">
+            <span> </span>
+        </h3>
+    </center>
+    </div>
+</div>
+
+    <div class="col-sm-4" style="padding-top: 50px; padding-bottom: 30px;">
+    <center>
+        <div class="image-section" style="display:none;">
+      <input type="button" value = "重置" onclick="history.go(0)" class="btn btn-success btn-lg " id="btn-predict" />
+        </div>
+    </center>
+    </div>
+
+
+{% endblock %}

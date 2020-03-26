@@ -1,9 +1,14 @@
-FROM python:3.5.5
-WORKDIR /SSD_Flask_new
+FROM dwqy11/ssd_flask:2
 
-COPY requirements.txt ./
-RUN pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# for flask web server
+EXPOSE 5000
 
-COPY . .
+# set working directory
+# ADD . /SSD_app
+WORKDIR /SSD_Flask_docker
 
-CMD flask run
+# install required libraries
+COPY ./ ./
+
+# This is the runtime command for the container
+CMD bin/bash 
