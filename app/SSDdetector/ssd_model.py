@@ -88,7 +88,8 @@ class SSD_detctor():
         img_name = input_image_path.split('/')[-1]
         print(img_name)
 
-        results_dir = "./static/detect-results/"
+        results_dir = "./app/static/detect-results/"
+        print(results_dir)
         if not os.path.exists(results_dir):
             os.makedirs(results_dir)
         cv2.imwrite(results_dir + img_name, rbg_image)
@@ -96,7 +97,7 @@ class SSD_detctor():
 
 if __name__ == "__main__":
 
-    model_path = "./SSD_app/SSDdetector/weights/ssd300_mAP_77.43_v2.pth"
+    model_path = "./app/SSDdetector/weights/ssd300_mAP_77.43_v2.pth"
 
     detector = SSD_detctor(model_path)
     # img = cv2.imread("01.jpg")
