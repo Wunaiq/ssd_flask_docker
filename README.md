@@ -59,22 +59,31 @@ python3 app/app.py
 
 Now the server is running on: http://0.0.0.0:8008
 
-*The model file is in ``` ./app/SSDdetector/weights/ ``` .
+Tips:
+- The model file is in ``` ./app/SSDdetector/weights/ ``` 
+- The uploads files and detector results are in ``` ./app/static/ ```
 
+### 3. Run a demo of SSD or debug the model alone
+```
+cd ./app/SSDdetector
+python3 ssd_model.py
+```
 
 ## Train
 
 ```
-python3 ./app/SSDdetector/train.py
+cd ./app/SSDdetector/
+python3 ./trainval/train.py
 ```
 
-
-## Test 
+## Eval
 
 ```
-python3 ./app/SSDdetector/ssd_model.py
+cd ./app/SSDdetector/
+python3 ./trainval/eval.py
 ```
 
+---
 
 ### Reference:
 

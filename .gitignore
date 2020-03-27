@@ -4,6 +4,7 @@ coco/
 results/
 uploads/
 weights/
+detection_results/
 
 *.jpg
 *.jpeg

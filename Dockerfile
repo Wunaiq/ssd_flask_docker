@@ -23,4 +23,4 @@ COPY requirements.txt ./
 RUN pip3 install -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
     
 # This is the runtime command for the container
-CMD bin/bash
+CMD python3 app.py

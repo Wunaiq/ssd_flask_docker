@@ -1,3 +1,4 @@
+from __future__ import division, print_function, absolute_import
 import os
 import sys
 import cv2
@@ -9,12 +10,17 @@ from torch.autograd import Variable
 from matplotlib import pyplot as plt
 from PIL import Image
 import json
+import time
+from tqdm import tqdm
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(BASE_DIR)
 
 
 # from data import VOC_CLASSES as labels
-from .data import VOC_CLASSES as labels
+from data import VOC_CLASSES as labels
 
-from .ssd import build_ssd
+from ssd import build_ssd
 
 if torch.cuda.is_available():
     torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -32,47 +38,45 @@ class SSD_detctor():
         self.net.load_weights(model_path)
         
 
-    def detect(self, input_image_path):
+    def detect(self, image):
         """ input_image read by cv2 """
+        # if not image:
+        #     raise "The image is not exist!"
+        # rbg_image = cv2.imread(input_path)
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
-        rbg_image = cv2.imread(input_image_path)
-        rgb_image = cv2.cvtColor(rbg_image, cv2.COLOR_BGR2RGB)
-        
-        x = cv2.resize(rgb_image, (300, 300)).astype(np.float32)
-        x -= (104.0, 117.0, 123.0)
-        x = x.astype(np.float32)
-        x = x[:, :, ::-1].copy()
+        rgb_image = cv2.resize(rgb_image, (300, 300)).astype(np.float32)
+        rgb_image -= (104.0, 117.0, 123.0)
+        rgb_image = rgb_image.astype(np.float32)
+        rgb_image = rgb_image[:, :, ::-1].copy()
 
-        x = torch.from_numpy(x).permute(2, 0, 1)
+        rgb_image = torch.from_numpy(rgb_image).permute(2, 0, 1)
         # x = torch.from_numpy(x)  
-        xx = Variable(x.unsqueeze(0))     # wrap tensor in Variable
+        rgb_image = Variable(rgb_image.unsqueeze(0))     # wrap tensor in Variable
         if torch.cuda.is_available():
-            xx = xx.cuda()
-        y = self.net(xx)
-
-        top_k=10
+            rgb_image = rgb_image.cuda()
+        outputs = self.net(rgb_image).data
 
         COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         FONT = cv2.FONT_HERSHEY_SIMPLEX
 
-        detections = y.data
         # scale each detection back up to the image
-        scale = torch.Tensor(rgb_image.shape[1::-1]).repeat(2)
+        scale = torch.Tensor(image.shape[1::-1]).repeat(2)
         bboxs = []
-        for i in range(detections.size(1)):
+        for i in range(outputs.size(1)):
             j = 0
-            while detections[0,i,j,0] >= 0.2:
-                score = detections[0,i,j,0]
+            while outputs[0,i,j,0] >= 0.2:
+                score = outputs[0,i,j,0]
                 label_name = labels[i-1]
                 display_txt = '%s: %.2f'%(label_name, score)
-                pt = (detections[0,i,j,1:]*scale).cpu().numpy()
+                pt = (outputs[0,i,j,1:]*scale).cpu().numpy()
                 bboxs.append(pt.tolist())
-                coords = (pt[0], pt[1]), pt[2]-pt[0]+1, pt[3]-pt[1]+1
+                # coords = (pt[0], pt[1]), pt[2]-pt[0]+1, pt[3]-pt[1]+1
                 # color = colors[i]
                 # currentAxis.add_patch(plt.Rectangle(*coords, fill=False, edgecolor=color, linewidth=2))
                 # currentAxis.text(pt[0], pt[1], display_txt, bbox={'facecolor':color, 'alpha':0.5})
-                cv2.rectangle(rbg_image, (pt[0], pt[1]), (pt[2], pt[3]), COLORS[i % 3], 1)
-                cv2.putText(rbg_image, display_txt, (pt[0], pt[1]), FONT, 0.4, COLORS[i % 3], 1)
+                cv2.rectangle(image, (pt[0], pt[1]), (pt[2], pt[3]), COLORS[i % 3], 1)
+                cv2.putText(image, display_txt, (pt[0], pt[1]), FONT, 0.4, COLORS[i % 3], 1)
                 j+=1
 
         # res_img = rbg_image.tolist()
@@ -85,22 +89,48 @@ class SSD_detctor():
         # res_json = json.dumps(res_dict)
         # with open("json.txt", "w") as f:
         #     f.write(res_json)
-        img_name = input_image_path.split('/')[-1]
-        print(img_name)
+        # img_name = input_image_path.split('/')[-1]
+        # print(img_name)
 
-        results_dir = "./app/static/detect-results/"
-        print(results_dir)
-        if not os.path.exists(results_dir):
-            os.makedirs(results_dir)
-        cv2.imwrite(results_dir + img_name, rbg_image)
-        return bboxs
+        # results_dir = "./app/static/detect-results/"
+        # print(results_dir)
+        # if not os.path.exists(results_dir):
+        #     os.makedirs(results_dir)
+        # cv2.imwrite(results_dir + img_name, rbg_image)
+        
+        return image, bboxs
 
 if __name__ == "__main__":
 
-    model_path = "./app/SSDdetector/weights/ssd300_mAP_77.43_v2.pth"
+    model_path = "./weights/ssd300_mAP_77.43_v2.pth"
+    model = SSD_detctor(model_path)
 
-    detector = SSD_detctor(model_path)
-    # img = cv2.imread("01.jpg")
-    img = './01.jpg'
-    res = detector.detect(img)
-    # print(res)
+    img_dir = "./test_inputs"
+    # results_dir = "./test_results"
+    results_dir = "./test_results/images"
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    results_log = open("./test_results/results_log.json", "w")
+
+
+
+    start = time.time()
+    num = 0
+    for imgs in tqdm(os.listdir(img_dir)):
+        imgs_path = os.path.join(img_dir, imgs)
+        image = cv2.imread(imgs_path)
+        
+        res_image, res_bboxs = model.detect(image)
+
+        cv2.imwrite(os.path.join(results_dir, imgs), res_image)
+        results_log.write("image " + str(num) + " : " + imgs + "\n")
+        json.dump(res_bboxs, results_log, "a")
+        results_log.write("\n")
+        num += 1
+    
+    cost_time_total = time.time() - start
+    print("Cost time totally: %.4f" % cost_time_total)
+    print("Cost time per image: %.4f" % (cost_time_total / num))
+    print("FPS is: %0.4f" % (num / cost_time_total))
+
+    results_log.close()
