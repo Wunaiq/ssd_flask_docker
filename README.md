@@ -5,7 +5,7 @@ A SSD object detection web project implemented with Flask and Docker.
 The referenced paper is: SSD: Single Shot MultiBox Detector https://arxiv.org/pdf/1512.02325.pdf
 
 
-## Main Requirements and Version
+## Main Requirements and Versions
 
 ```
 python 3.5.5
@@ -44,9 +44,6 @@ Args in the above command:
 - -v: link the folder of host (/base_path/ssd_flask_docker) with a folder of container(/ssd_flask_docker)
 
 - -p: map the port 8008 of container to the port 8008 of host. We has set the sever port as 8008 in ./app/app.py 
-
-
-Tip: we prefer to use the docker container for the sake of convenience. And we will also run the web server in this container afterwards.
 
 ### 2. Run the web server
 

@@ -18,7 +18,7 @@ app.config.from_object(Config)
 
 
 # SSD   
-from SSDdetector import SSD_detctor
+from SSDdetector.ssd import SSD_detctor
 
 # define the model
 model_path = "./app/SSDdetector/weights/ssd300_mAP_77.43_v2.pth"
