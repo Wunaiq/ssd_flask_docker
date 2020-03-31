@@ -50,9 +50,10 @@ def index():
 def predict():
     if request.method == 'POST':
         file_path = get_file_path_and_save(request)
-        image_name = file_path.split('/')[-1]
+        # image_name = file_path.split('\\')[-1]   # on windows
+        image_name = file_path.split('/')[-1]   # on linux
 
-        image = cv2.imread(file_path)
+        image = cv2.imread(file_path, cv2.IMREAD_COLOR)
         res_image, res_bboxs = model.detect(image)
         
         basepath = os.path.abspath(os.path.dirname(__file__))
@@ -62,6 +63,7 @@ def predict():
         if not os.path.exists(res_dir):
             os.makedirs(res_dir)
         cv2.imwrite(os.path.join(res_dir, image_name), res_image)
+        print(os.path.join(res_dir, image_name))
         
         # write detection bboxs log
         with open(res_log, "a") as f:
@@ -72,7 +74,7 @@ def predict():
             json.dump(res_bboxs, f, "a")
             f.write("\n")            
 
-        return os.path.join(Config.DETECTION_RESULTS_DIR, image_name)   # 需要返回结果图片的地址
+        return os.path.join(Config.DETECTION_RESULTS_DIR, image_name)   
     return None
 
 if __name__ == '__main__':

@@ -1,7 +1,3 @@
-from data import *
-from utils.augmentations import SSDAugmentation
-from layers.modules import MultiBoxLoss
-from ssd import build_ssd
 import os
 import sys
 import time
@@ -14,6 +10,14 @@ import torch.nn.init as init
 import torch.utils.data as data
 import numpy as np
 import argparse
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.append(BASE_DIR)
+
+from data import *
+from utils.augmentations import SSDAugmentation
+from layers.modules import MultiBoxLoss
+from layers.ssd_model import build_ssd
 
 
 def str2bool(v):
@@ -90,6 +94,7 @@ def train():
 
     if args.visdom:
         import visdom
+        global viz
         viz = visdom.Visdom()
 
     ssd_net = build_ssd('train', cfg['min_dim'], cfg['num_classes'])
@@ -152,7 +157,7 @@ def train():
     for iteration in range(args.start_iter, cfg['max_iter']):
         if args.visdom and iteration != 0 and (iteration % epoch_size == 0):
             # the operation at the end of an epoch
-            update_vis_plot(epoch, loc_loss, conf_loss, epoch_plot, None,
+            update_vis_plot(epoch, loc_loss, conf_loss, iter_plot, epoch_plot,
                             'append', epoch_size)
             # reset epoch loss counters
             loc_loss = 0
@@ -164,7 +169,12 @@ def train():
             adjust_learning_rate(optimizer, args.gamma, step_index)
 
         # load train data
-        images, targets = next(batch_iterator)
+        # images, targets = next(batch_iterator)
+        try:
+            images, targets = next(batch_iterator)
+        except StopIteration:
+            batch_iterator = iter(data_loader)
+            images, targets = next(batch_iterator)
 
         if args.cuda:
             images = Variable(images.cuda())
@@ -182,16 +192,18 @@ def train():
         loss.backward()
         optimizer.step()
         t1 = time.time()
-        loc_loss += loss_l.data[0]
-        conf_loss += loss_c.data[0]
+        # loc_loss += loss_l.data[0]
+        loc_loss += loss_l.data
+        conf_loss += loss_c.data
 
         if iteration % 10 == 0:
             print('timer: %.4f sec.' % (t1 - t0))
-            print('iter ' + repr(iteration) + ' || Loss: %.4f ||' % (loss.data[0]), end=' ')
+            print('iter ' + repr(iteration) + ' || Loss: %.4f ||' % (loss.data), end=' ')
 
         if args.visdom:
-            update_vis_plot(iteration, loss_l.data[0], loss_c.data[0],
+            update_vis_plot(iteration, loss_l.data, loss_c.data,
                             iter_plot, epoch_plot, 'append')
+
 
         if iteration != 0 and iteration % 5000 == 0:
             print('Saving state, iter:', iteration)

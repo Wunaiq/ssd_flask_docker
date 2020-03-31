@@ -1,11 +1,15 @@
 # data
 VOCdevkit/
-coco/
+images/
 results/
 uploads/
-weights/
 detection_results/
+test_inputs/
+test_results/
+eval/
 
+
+*.pth
 *.jpg
 *.jpeg
 *.png

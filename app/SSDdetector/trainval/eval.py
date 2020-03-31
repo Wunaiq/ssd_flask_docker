@@ -5,16 +5,6 @@
 """
 
 from __future__ import print_function
-import torch
-import torch.nn as nn
-import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
-from data import VOC_ROOT, VOCAnnotationTransform, VOCDetection, BaseTransform
-from data import VOC_CLASSES as labelmap
-import torch.utils.data as data
-
-from ssd import build_ssd
-
 import sys
 import os
 import time
@@ -22,6 +12,18 @@ import argparse
 import numpy as np
 import pickle
 import cv2
+import torch
+import torch.nn as nn
+import torch.backends.cudnn as cudnn
+from torch.autograd import Variable
+import torch.utils.data as data
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.append(BASE_DIR)
+
+from data import VOC_ROOT, VOCAnnotationTransform, VOCDetection, BaseTransform
+from data import VOC_CLASSES as labelmap
+from layers.ssd_model import build_ssd
 
 if sys.version_info[0] == 2:
     import xml.etree.cElementTree as ET
@@ -69,7 +71,9 @@ else:
 annopath = os.path.join(args.voc_root, 'VOC2007', 'Annotations', '%s.xml')
 imgpath = os.path.join(args.voc_root, 'VOC2007', 'JPEGImages', '%s.jpg')
 imgsetpath = os.path.join(args.voc_root, 'VOC2007', 'ImageSets',
-                          'Main', '{:s}.txt')
+                          'Main', '{:s}.txt')                      # on linux
+# imgsetpath = os.path.join(args.voc_root, 'VOC2007', 'ImageSets',
+                        #   'Main', '{s}.txt')                        # on windows
 YEAR = '2007'
 devkit_path = args.voc_root + 'VOC' + YEAR
 dataset_mean = (104, 117, 123)
