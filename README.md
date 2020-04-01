@@ -138,9 +138,9 @@ python3 ./trainval/eval.py
 
 Performance on VOC2007 Test：
 
-| mAP | FPS(GTX Titan X)| FPS(CPU)|FPS(GTX 1060 according to amdegroot/ssd.pytorch)|
-|:-:|:-:|:-:|:-:|
-| 77.49 % |22.62|2.28|45.45|
+| mAP | FPS(GTX Titan X)| FPS(CPU)|
+|:-:|:-:|:-:|
+| 77.49 % |22.62|2.28|
 
 
 
