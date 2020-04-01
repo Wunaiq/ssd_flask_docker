@@ -71,7 +71,7 @@ def predict():
             time_stamp = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time_stamp/1000))
 
             f.write(time_stamp + "  " + image_name + "\n")
-            json.dump(res_bboxs, f, "a")
+            json.dump(res_bboxs, f)
             f.write("\n")            
 
         return os.path.join(Config.DETECTION_RESULTS_DIR, image_name)   

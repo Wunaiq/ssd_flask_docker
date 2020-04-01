@@ -8,8 +8,8 @@ The referenced paper is: SSD: Single Shot MultiBox Detector https://arxiv.org/pd
 ## Main Requirements and Versions
 
 ```
-python 3.5.5
-pytorch 1.2.0
+python >= 3.5
+pytorch >= 1.0.0
 cuda 9.0
 cudnn 7
 ```
@@ -30,6 +30,20 @@ For convenience, you can also use the docker images has been build as following:
 
 ```
 docker pull wunaiq/ssd_flask_docker:cuda90_cudnn7_py35_pytorch1.12_ubuntu16.04
+```
+*For the sake of platform incompatibility, here is an standby docker image:
+```
+docker pull wunaiq/ssd_flask_docker:py36_pytorch1.0.0_cu9.0
+```
+or download the docker image file at:
+```
+link：https://pan.baidu.com/s/1ONSNABZp17ACdZSSxhXW0w 
+code：x07z 
+```
+
+and load the image by:
+```
+docker load wunaiq_ssd_flask_docker_py36_pytorch1.0.0_cu9.0.tar
 ```
 
 
@@ -57,7 +71,12 @@ python3 app/app.py
 Now the server is running on: http://0.0.0.0:8008
 
 Tips:
-- Download model weights at: https://drive.google.com/open?id=1eld9vbMju-79cX3Lw6oxhoHR3aAmIkSj
+- Download model weights at: 
+```
+link：https://pan.baidu.com/s/1wF66G4FG1fc086nqG7S2-Q 
+code：zkvp 
+```
+
 - The model file should be put in ``` ./app/SSDdetector/weights/ ``` 
 - The uploads files and detector results are in ``` ./app/static/ ```
 
@@ -119,14 +138,9 @@ python3 ./trainval/eval.py
 
 Performance on VOC2007 Test：
 
-##### mAP
-
-| Original | Converted weiliu89 weights | From scratch w/o data aug | From scratch w/ data aug |
+| mAP | FPS(GTX Titan X)| FPS(CPU)|FPS(GTX 1060 according to amdegroot/ssd.pytorch)|
 |:-:|:-:|:-:|:-:|
-| 77.2 % | 77.26 % | 58.12% | 77.43 % |
-
-##### FPS
-**GTX 1060:** ~45.45 FPS
+| 77.49 % |22.62|2.28|45.45|
 
 
 
