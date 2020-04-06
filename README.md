@@ -14,7 +14,9 @@ cuda 9.0
 cudnn 7
 ```
 
+&nbsp;
 
+---
 ## Quick Start
 
 ### 1. Prepare the environment
@@ -86,6 +88,35 @@ cd ./app/SSDdetector
 python3 ssd_model.py
 ```
 
+&nbsp;
+
+---
+## Web Test & Eval
+1. Test on custom data
+
+```
+cd ./web_test
+mkdir custom_data  # and put your test images in this folder
+python web_test.py -restype=image \
+                   -data_root=./custom_data \
+                   -save_dir=./custom_results \
+```
+-restype: 
+* image: test on custom data and return image with bboxes drew
+* bboxes: test on custom data and return locations of bboxes
+* precision: eval on VOC and return mAP
+
+-save_dir: directory of all the web test results
+
+2. Eval on VOC 
+```
+python web_test.py -restype=precision \
+                   -data_root=../app/SSDdetector/data/VOCdevkit \
+                   -save_dir=./voc_results \
+```
+&nbsp;
+
+---
 ## SSD Training
 
 ### 1. Preparation
@@ -127,9 +158,7 @@ python3 -m visdom.server
 # Then navigate to http://localhost:8097/ during training
 ```
 
-
-
-## Eval
+## SSD Eval
 
 ```
 cd ./app/SSDdetector/
@@ -142,9 +171,6 @@ Performance on VOC2007 Test：
 |:-:|:-:|:-:|
 | 77.49 % |22.62|2.28|
 
-
-
-&nbsp;
 
 &nbsp;
 
