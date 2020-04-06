@@ -124,7 +124,7 @@ class VOCDetection(data.Dataset):
 
         target = ET.parse(self._annopath % img_id).getroot()
         img = cv2.imread(self._imgpath % img_id)
-        height, width, channels = img.shape
+        height, width, _ = img.shape
 
         if self.target_transform is not None:
             target = self.target_transform(target, width, height)

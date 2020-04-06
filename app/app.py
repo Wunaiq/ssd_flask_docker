@@ -7,8 +7,11 @@ sys.path.append(BASE_DIR)
 import cv2
 import time
 import json
+import base64
+import numpy as np
+from PIL import Image
 # Flask utils
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, Response, make_response, jsonify
 from werkzeug.utils import secure_filename
 from gevent.pywsgi import WSGIServer
 from config import Config
@@ -50,11 +53,12 @@ def index():
 def predict():
     if request.method == 'POST':
         file_path = get_file_path_and_save(request)
+        
         # image_name = file_path.split('\\')[-1]   # on windows
         image_name = file_path.split('/')[-1]   # on linux
 
         image = cv2.imread(file_path, cv2.IMREAD_COLOR)
-        res_image, res_bboxs = model.detect(image)
+        res_image, res_bboxs, _ = model.detect(image)
         
         basepath = os.path.abspath(os.path.dirname(__file__))
         res_dir = os.path.join(basepath, Config.DETECTION_RESULTS_DIR)
@@ -63,7 +67,6 @@ def predict():
         if not os.path.exists(res_dir):
             os.makedirs(res_dir)
         cv2.imwrite(os.path.join(res_dir, image_name), res_image)
-        print(os.path.join(res_dir, image_name))
         
         # write detection bboxs log
         with open(res_log, "a") as f:
@@ -74,8 +77,35 @@ def predict():
             json.dump(res_bboxs, f)
             f.write("\n")            
 
-        return os.path.join(Config.DETECTION_RESULTS_DIR, image_name)   
+        return os.path.join(Config.DETECTION_RESULTS_DIR, image_name)  
     return None
+
+@app.route('/test', methods=['POST', 'GET'])
+def test():
+    image_data = base64.b64decode(str(request.form['image']))
+    image_name = str(request.form['filename'])
+    restype = str(request.form['restype'])
+    image_data = np.fromstring(image_data, np.uint8)
+    image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
+
+    res_image, res_bboxs, outputs = model.detect(image)
+
+    if restype == "precision":
+        outputs = np.ndarray.tolist(outputs)  # numpy ndarry to list
+        outputs_dict = {}
+        outputs_dict['outputs'] = outputs
+        return jsonify(outputs_dict)
+        
+    elif restype == "bboxes":
+        res_bboxs_dict = {}
+        res_bboxs_dict[image_name] = res_bboxs
+        return jsonify(res_bboxs_dict)
+
+    else:          
+        _, buf = cv2.imencode(".jpg", res_image)
+        res_image = Image.fromarray(np.uint8(buf)).tobytes()
+        return res_image
+    
 
 if __name__ == '__main__':
     # Serve the app with gevent

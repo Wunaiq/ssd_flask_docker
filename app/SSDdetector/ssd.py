@@ -29,7 +29,7 @@ class SSD_detctor():
         
         self.net = build_ssd('test', 300, 21)    # initialize SSD
         self.net.load_weights(model_path)
-        
+        self.net.eval()
 
     def detect(self, input_image):
         """ input_image read as bgr image """
@@ -44,7 +44,7 @@ class SSD_detctor():
         image = Variable(image.unsqueeze(0))     # wrap tensor in Variable
         if torch.cuda.is_available():
             image = image.cuda()
-        outputs = self.net(image).data
+        outputs = self.net(image).data    # outputs [1, 21, 200, 5]
 
         COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -52,23 +52,24 @@ class SSD_detctor():
         # scale each detection back up to the input_image
         scale = torch.Tensor(input_image.shape[1::-1]).repeat(2)
         bboxs = []
+
         for i in range(outputs.size(1)):
             j = 0
-            while outputs[0,i,j,0] >= 0.2:
+            while outputs[0,i,j,0] >= 0.6:
                 score = outputs[0,i,j,0]
                 label_name = labels[i-1]
                 display_txt = '%s: %.2f'%(label_name, score)
                 pt = (outputs[0,i,j,1:]*scale).cpu().numpy()
                 bboxs.append(pt.tolist())
+                # draw bbox
                 cv2.rectangle(input_image, (pt[0], pt[1]), (pt[2], pt[3]), \
                                 COLORS[i % 3], max(input_image.shape[0]//8000, 1))   
                 cv2.putText(input_image, display_txt, (pt[0], pt[1]), FONT, \
                             max(input_image.shape[0]//1000, 0.4), COLORS[i % 3], \
                             max(input_image.shape[0]//800, 1), cv2.LINE_AA)
-                print(display_txt)
                 j+=1
-    
-        return input_image, bboxs
+
+        return input_image, bboxs, outputs.numpy()
 
 if __name__ == "__main__":
 

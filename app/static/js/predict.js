@@ -44,11 +44,12 @@ $(document).ready(function () {
             cache: false,
             processData: false,
             async: true,
-            datatype: "json",
             success: function (response) {
                 // Get and display the result
                 $('.loader').hide();
                 $('.detection-result').show();
+                res_image = response.content;
+
                 $('#result-img').attr('src', response);
                 console.log(response);
             },

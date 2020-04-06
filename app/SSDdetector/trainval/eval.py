@@ -372,14 +372,13 @@ def test_net(save_folder, net, cuda, dataset, transform, top_k,
     #    all_boxes[cls][image] = N x 5 array of detections in
     #    (x1, y1, x2, y2, score)
     all_boxes = [[[] for _ in range(num_images)]
-                 for _ in range(len(labelmap)+1)]
+                 for _ in range(len(labelmap)+1)]    # [len(labelmap)+1, num_images, 0]
 
     # timers
     _t = {'im_detect': Timer(), 'misc': Timer()}
     output_dir = get_output_dir('ssd300_120000', set_type)
     det_file = os.path.join(output_dir, 'detections.pkl')
 
-    start = time.time()
     for i in range(num_images):
         im, gt, h, w = dataset.pull_item(i)
 
@@ -391,10 +390,10 @@ def test_net(save_folder, net, cuda, dataset, transform, top_k,
         detect_time = _t['im_detect'].toc(average=False)
 
         # skip j = 0, because it's the background class
-        for j in range(1, detections.size(1)):
+        for j in range(1, detections.size(1)):  # detections:[batch_size, num_classes, top_k, 5]
             dets = detections[0, j, :]
             mask = dets[:, 0].gt(0.).expand(5, dets.size(0)).t()
-            dets = torch.masked_select(dets, mask).view(-1, 5)
+            dets = torch.masked_select(dets, mask).view(-1, 5)  
             if dets.size(0) == 0:
                 continue
             boxes = dets[:, 1:]
@@ -411,8 +410,9 @@ def test_net(save_folder, net, cuda, dataset, transform, top_k,
         print('im_detect: {:d}/{:d} {:.3f}s'.format(i + 1,
                                                     num_images, detect_time))
     
-    total_time = time.time() - start
-    print('total_time: {:.3f}s, fps: {:.3f}s'.format(total_time, num_images/total_time))
+    total_time = _t['im_detect'].total_time
+    fps = _t['im_detect'].calls / _t['im_detect'].total_time
+    print('total_time: {:.3f}s, fps: {:.3f}s'.format(total_time, fps))
 
     with open(det_file, 'wb') as f:
         pickle.dump(all_boxes, f, pickle.HIGHEST_PROTOCOL)

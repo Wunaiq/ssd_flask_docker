@@ -7,13 +7,17 @@ detection_results/
 test_inputs/
 test_results/
 eval/
+custom_data/
+custom_results/
+voc_results/
 
 
 *.pth
 *.jpg
 *.jpeg
 *.png
-
+*.tar
+*.pkl
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
