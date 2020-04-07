@@ -19,8 +19,7 @@ sys.path.append(BASE_DIR)
 from data import VOC_CLASSES as labels
 from layers.ssd_model import build_ssd
 
-if torch.cuda.is_available():
-    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+
 
 
 class SSD_detctor():
@@ -31,7 +30,7 @@ class SSD_detctor():
         self.net.load_weights(model_path)
         self.net.eval()
 
-    def detect(self, input_image):
+    def detect(self, input_image, cuda=True):
         """ input_image read as bgr image """
 
        
@@ -42,10 +41,18 @@ class SSD_detctor():
 
         image = torch.from_numpy(image).permute(2, 0, 1)
         image = Variable(image.unsqueeze(0))     # wrap tensor in Variable
-        if torch.cuda.is_available():
-            image = image.cuda()
-        outputs = self.net(image).data    # outputs [1, 21, 200, 5]
 
+        if torch.cuda.is_available() and cuda == "True":
+            torch.set_default_tensor_type('torch.cuda.FloatTensor')
+            self.net = self.net.cuda()
+            image = image.cuda()
+
+        if cuda == "False":
+            self.net = self.net.cpu()
+            torch.set_default_tensor_type('torch.FloatTensor')
+
+        outputs = self.net(image).data    # outputs [1, 21, 200, 5]
+        
         COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
         FONT = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -69,7 +76,7 @@ class SSD_detctor():
                             max(input_image.shape[0]//800, 1), cv2.LINE_AA)
                 j+=1
 
-        return input_image, bboxs, outputs.numpy()
+        return input_image, bboxs, outputs.cpu().numpy()
 
 if __name__ == "__main__":
 

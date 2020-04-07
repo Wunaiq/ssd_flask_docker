@@ -100,6 +100,7 @@ mkdir custom_data  # and put your test images in this folder
 python web_test.py -restype=image \
                    -data_root=./custom_data \
                    -save_dir=./custom_results \
+                   -cuda=True
 ```
 -restype: 
 * image: test on custom data and return image with bboxes drew
@@ -107,12 +108,14 @@ python web_test.py -restype=image \
 * precision: eval on VOC and return mAP
 
 -save_dir: directory of all the web test results
+-cuda: test on GPU or not
 
 2. Eval on VOC 
 ```
 python web_test.py -restype=precision \
                    -data_root=../app/SSDdetector/data/VOCdevkit \
                    -save_dir=./voc_results \
+                   -cuda=True
 ```
 &nbsp;
 

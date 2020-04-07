@@ -85,10 +85,11 @@ def test():
     image_data = base64.b64decode(str(request.form['image']))
     image_name = str(request.form['filename'])
     restype = str(request.form['restype'])
+    cuda = str(request.form['cuda'])
     image_data = np.fromstring(image_data, np.uint8)
     image = cv2.imdecode(image_data, cv2.IMREAD_COLOR)
 
-    res_image, res_bboxs, outputs = model.detect(image)
+    res_image, res_bboxs, outputs = model.detect(image, cuda)
 
     if restype == "precision":
         outputs = np.ndarray.tolist(outputs)  # numpy ndarry to list

@@ -6,7 +6,6 @@ import time
 import sys
 import cv2
 import os
-import tqdm
 from io import BytesIO
 import argparse
 from PIL import Image
@@ -25,6 +24,14 @@ from app.SSDdetector.data import BaseTransform, VOCAnnotationTransform
 from app.SSDdetector.data import VOC_CLASSES
 from eval_on_web import eval_on_web
 
+
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Unsupported value encountered.')
 
 
 class Timer(object):
@@ -60,6 +67,7 @@ class Test():
         self.test_url = args.test_url
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
+        self.cuda = args.cuda
 
     def test(self):
         
@@ -81,7 +89,8 @@ class Test():
             
             img_data = {'image': [img], 
                         'filename': img_name, 
-                        'restype': self.restype}
+                        'restype': self.restype,
+                        'cuda': self.cuda}
             _t.tic()
             response = requests.post(self.test_url, data=img_data)
             detection_time = _t.toc(average=False)
@@ -112,24 +121,25 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
 
-    # set for test custom data
+    # default set for test custom data
     # parser.add_argument("-restype", type=str, default="bboxes", help="return date type: image, bboxes or precision")
     # parser.add_argument("-data_root", type=str, default="./custom_data", help="test data")
     # parser.add_argument("-save_dir", type=str, default="./custom_results", help="test results save dir")
     # parser.add_argument("-test_url", type=str, default="http://0.0.0.0:8008/test", help="test url")
+    # parser.add_argument("-cuda", type=str2bool, default=True, help="turn on gpu or turn off")
     
-    # set for test voc data
+    # default set for test voc data
     parser.add_argument("-restype", type=str, default="precision", help="return date type: image, bboxes or precision")
     parser.add_argument("-data_root", type=str, default="../app/SSDdetector/data/VOCdevkit", help="test data")
     parser.add_argument("-save_dir", type=str, default="./voc_results", help="test results save dir")
     parser.add_argument("-test_url", type=str, default="http://0.0.0.0:8008/test", help="test url")
+    parser.add_argument("-cuda", type=str2bool, default=True, help="turn on gpu or turn off")
     
     args = parser.parse_args()
 
     if args.restype == "precision":   # here use voc 2007 for precision test
 
-        # test_net(args.test_url, dataset, args.save_dir)
-        web_eval = eval_on_web(args.save_dir, args.data_root, YEAR='2007')
+        web_eval = eval_on_web(args.save_dir, args.data_root, YEAR='2007', cuda=args.cuda)
         web_eval.test_net(args.test_url)
     else:
         test = Test(args)

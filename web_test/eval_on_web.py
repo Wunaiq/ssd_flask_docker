@@ -135,7 +135,7 @@ class VOC_dataload():
         return img_id[1], gt
 
 class eval_on_web():
-    def __init__(self, save_dir, voc_root, YEAR):
+    def __init__(self, save_dir, voc_root, YEAR, cuda):
         self.save_dir = save_dir
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
@@ -153,6 +153,7 @@ class eval_on_web():
         self.dataset = VOC_dataload(voc_root, [('2007', 'test')],
                             BaseTransform(300, dataset_mean),
                             VOCAnnotationTransform())
+        self.cuda = cuda
 
     def parse_rec(self, filename):
         """ Parse a PASCAL VOC xml file """
@@ -316,6 +317,7 @@ class eval_on_web():
         with open(imagesetfile, 'r') as f:
             lines = f.readlines()
         imagenames = [x.strip() for x in lines]
+
         if not os.path.isfile(cachefile):
             # load annots
             recs = {}
@@ -438,7 +440,8 @@ class eval_on_web():
             img_bin = base64.b64encode(img_bin)
             img_data = {'image': [img_bin], 
                         'filename': i+1,
-                        'restype': "precision"}
+                        'restype': "precision",
+                        'cuda': self.cuda}
 
             _t['im_detect'].tic()
             response = requests.post(test_url, data=img_data)
