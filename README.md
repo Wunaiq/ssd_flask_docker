@@ -27,7 +27,7 @@ docker run -itd \
            --name=server \
            --network=host \
            -p 8008:8008 \
-           wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04
+           wunaiq/ssd_flask_docker:py36_pytorch1.0.0_cu90
 ```
 Now, the web server is runing on: [http://0.0.0.0:8008](http://0.0.0.0:8008)
 
