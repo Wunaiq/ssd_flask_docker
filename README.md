@@ -14,84 +14,48 @@ cuda 9.0
 cudnn 7
 ```
 
+
+
 &nbsp;
 
----
 ## Quick Start
 
-### 1. Prepare the environment
-
-Install dependency packages according to the requirements.txt:
+### 1. Run web service in Docker Container
 ```
-pip3 install -r requirements.txt
+docker pull wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04
+docker run -itd \
+           --name=server \
+           --network=host \
+           -p 8008:8008 \
+           wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04
 ```
+Now, the web server is runing on: [http://0.0.0.0:8008](http://0.0.0.0:8008)
 
-For convenience, you can also use the docker images has been build as following:
-
-#### Pull the pre-built docker image
-
+### 2. Test in Docker Contanier
 ```
-docker pull wunaiq/ssd_flask_docker:cuda90_cudnn7_py35_pytorch1.12_ubuntu16.04
-```
-*For the sake of platform incompatibility, here is an standby docker image:
-```
-docker pull wunaiq/ssd_flask_docker:py36_pytorch1.0.0_cu9.0
-```
-or download the docker image file at:
-```
-link：https://pan.baidu.com/s/1ONSNABZp17ACdZSSxhXW0w 
-code：x07z 
-```
+docker run -it \
+           --name=client \
+           --network=host \
+           wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04 \
+           /bin/bash
 
-and load the image by:
-```
-docker load wunaiq_ssd_flask_docker_py36_pytorch1.0.0_cu9.0.tar
-```
+# Run test scrip in contanier to ensure that the environment meets the requirements.
+# There are some test images in container for simple testing, more detatils about testing are in Web Test & Eval.
 
-
-#### Run the docker container
-
-```
-docker run -it --gpus all -v /base_path/ssd_flask_docker:/ssd_flask_docker -p 8008:8008 ssd_flask_docker:cuda90_cudnn7_py35_pytorch1.12_ubuntu16.04 /bin/bash
-```
-Please replace the /base_path in the above command with the absolute path of your root directory.
-
-Args in the above command:
-- -v: link the folder of host (/base_path/ssd_flask_docker) with a folder of container(/ssd_flask_docker)
-
-- -p: map the port 8008 of container to the port 8008 of host. We has set the sever port as 8008 in ./app/app.py 
-
-### 2. Run the web server
-
-The server can be started by running:
-
-```
-cd ./ssd_flask_docker
-python3 app/app.py
+python web_test.py \
+       -restype=bboxes \
+       -data_root=./custom_data/ \
+       -save_dir=./custom_results \
+       -test_url=http://0.0.0.0:8008/test \
+       -cuda=True                                    
 ```
 
-Now the server is running on: http://0.0.0.0:8008
-
-Tips:
-- Download model weights at: 
-```
-link：https://pan.baidu.com/s/1wF66G4FG1fc086nqG7S2-Q 
-code：zkvp 
-```
-
-- The model file should be put in ``` ./app/SSDdetector/weights/ ``` 
-- The uploads files and detector results are in ``` ./app/static/ ```
-
-### 3. Run a demo of SSD or debug the model alone
-```
-cd ./app/SSDdetector
-python3 ssd_model.py
-```
 
 &nbsp;
 
 ---
 ## Web Test & Eval
+
 1. Test on custom data
 
 ```
