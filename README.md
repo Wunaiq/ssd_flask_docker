@@ -22,7 +22,7 @@ cudnn 7
 
 ### 1. Run web service in Docker Container
 ```
-docker pull wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04
+docker pull wunaiq/ssd_flask_docker:py36_pytorch1.0.0_cu90
 docker run -itd \
            --name=server \
            --network=host \
@@ -36,7 +36,7 @@ Now, the web server is runing on: [http://0.0.0.0:8008](http://0.0.0.0:8008)
 docker run -it \
            --name=client \
            --network=host \
-           wunaiq/ssd_flask_docker:py35_pytorch1.12_cu90_cudnn7_ubuntu16.04 \
+           wunaiq/ssd_flask_docker:py36_pytorch1.0.0_cu90 \
            /bin/bash
 
 # Run test scrip in contanier to ensure that the environment meets the requirements.
